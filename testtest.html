@@ -1,0 +1,142 @@
+<html lang="ja">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+ <link rel="stylesheet" type="text/css" href="sound.css">
+<title>Spoken Dialog by Javascript</title>
+<script src="sound.js"></script>
+
+<style>
+.startButton{
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #00abff;
+  color: #fff;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+</style>
+</head>
+<body>
+<h6>課題：音声対話</h6>
+<br></br>
+<h1>肯定くんとのおしゃべりサイト</h1>
+<br></br>
+<h3>何でも肯定してくれる肯定くんとおしゃべりして癒されよう！！</h3>
+<br></br>
+<h4>--使い方--</h4>
+<h5>>>お話しする<<のボタンを押してマイクを許可すれば
+お話しすることができます！<br>
+<br>
+読み取れない場合は一時停止ボタンを押しおてね<br>
+<br>
+読み取り中は青く文字化表示されるよ</h5>
+<br></br>
+<p>
+<button id="startButton">>>お話しする<<</button>
+<button id="stopButton">一次停止</button>
+</p>
+<br></br>
+<p>
+<div id="resultOutput"></div>
+<div class="photo-container">
+  
+</div>
+<div id="photo-container">
+  <img id="photo" src="" alt="">
+</div>
+<div class="photo-container">
+  <img src="t-boy.png" alt="話している男の子">
+</div>
+
+
+</p>
+<h2>肯定くん(6)</h2>
+<script>
+
+
+
+const startButton = document.querySelector('#startButton'); // 開始ボタン
+const stopButton = document.querySelector('#stopButton'); // 停止ボタン
+const resultOutput = document.querySelector('#resultOutput'); // 結果出力エリア
+
+if (!'SpeechSynthesisUtterance' in window) {
+    alert("あなたのブラウザはSpeech Synthesis APIに未対応です。");
+}
+const tts = new SpeechSynthesisUtterance(); // TTSインスタンスを生成
+//tts.text = textForm.value; // テキストを設定
+tts.lang = "ja-JP"; // 言語(日本語)、英語の場合はen-US
+tts.rate = 1.0; // 速度
+tts.pitch = -2.0; // 声の高さ
+tts.volume = 1.0; // 音量
+
+SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+if (!'SpeechRecognition' in window) {
+    alert("あなたのブラウザはSpeech Recognition APIに未対応です。");
+}
+
+// 応答の定義（ハッシュ）    
+var response = {
+    "あなたは誰ですか":"僕は肯定くんだ",
+    "愚痴を聞いて":"静かに聞いておくから存分に吐き出しな",
+    "人生って何":"笑うことだ",
+    "好きな言葉は":"i love youだ",
+		"あー今日も疲れたな":"明日も頑張って、君は誉れ高い生き物なんだ"
+};
+
+const asr = new SpeechRecognition(); // ASRインスタンスを生成
+asr.lang = "ja-JP"; // 言語（日本語）
+asr.interimResults = true; // 途中結果出力をオン
+asr.continuous = true; // 継続入力をオン
+
+let output = ''; // 出力
+
+// 認識結果が出力されたときのイベントハンドラ
+asr.onresult = function(event){
+	
+    let transcript = event.results[event.resultIndex][0].transcript; // 結果文字列
+    
+    
+    let output_not_final = '';
+  
+    if (event.results[event.resultIndex].isFinal) { // 結果が確定（Final）のとき
+	    
+	    asr.abort(); // 音声認識を停止
+	   
+        output += transcript + " =>　返事： " + response[transcript] + '<br>';
+	
+	    tts.text = response[transcript]+'よ';
+	    // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
+	    tts.onend = function(event){
+	        asr.start(); // 音声認識を再開
+	    }
+
+	    speechSynthesis.speak(tts); // 再生
+    } else { // 結果がまだ未確定のとき
+        output_not_final = '<span style="color:#ADD8E6;">' + transcript + '</span>';
+    }
+    resultOutput.innerHTML = output + output_not_final; // 応答結果の出力;;
+}
+
+// 開始ボタンのイベントハンドラ
+startButton.addEventListener('click', function() {
+    asr.start();
+})
+
+// 停止ボタンのイベントハンドラ
+stopButton.addEventListener('click', function() {
+    asr.stop();
+})
+
+
+
+
+
+</script>
+
+</body>
+</html>
