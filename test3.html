@@ -61,7 +61,7 @@
 var wake_word = "OK.*コンピューター";
 
 const URL = "https://jlp.yahooapis.jp/NLUService/V2/analyze?appid="; // APIのリクエストURL
-const APPID = "hogehogehogehogehogehogehogehogehogehogehogehoge"; // あなたのアプリケーションID
+const APPID = "dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-"; // あなたのアプリケーションID
 const queryURL = URL + APPID;
 
 const startButton = document.querySelector('#startButton'); // 開始ボタン
@@ -143,7 +143,7 @@ asr.onresult = function(event) {
         if (webpage) {
           window.open(webpage);
         } else if (transcript.includes("和歌山") && transcript.includes("晴れ")) {
-          const weatherAPIURL =  "https://map.yahooapis.jp/weather/V1/place?appid=" + appid + "&coordinates=" + encodeURI( query ) + "&output=json&callback=showResult";; // 天気APIのリクエストURLを設定
+          const weatherAPIURL =  'https://map.yahooapis.jp/weather/V1/place?appid=YOUR_APP_ID&coordinates=34.2300,135.1700&output=json'; // 天気APIのリクエストURLを設定
           const appID = 'dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-'; // あなたのアプリケーションIDを設定
 
           // 天気APIへのリクエストを行う処理
@@ -176,7 +176,7 @@ asr.onresult = function(event) {
             });
 
         } else if (transcript.includes("大阪") && transcript.includes("晴れ")) {
-          const weatherAPIURL =  "https://map.yahooapis.jp/weather/V1/place?appid=" + appid + "&coordinates=" + encodeURI( query ) + "&output=json&callback=showResult";; // 天気APIのリクエストURLを設定
+          const weatherAPIURL =  'https://map.yahooapis.jp/weather/V1/place?appid={appid}&coordinates=34.6937,135.5023&output=json'// 天気APIのリクエストURLを設定
           const appID = 'dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-'; // あなたのアプリケーションIDを設定
 
           // 天気APIへのリクエストを行う処理
@@ -221,39 +221,20 @@ asr.onresult = function(event) {
   }
 };
 
-// 音声認識エラーが発生したときのイベントハンドラ
-asr.onerror = function(event) {
-  console.error('音声認識エラー:', event.error);
+
+
+// 開始ボタンが押されたときのイベントハンドラ
+startButton.onclick = function(){
+    startButton.disabled = true; // 開始ボタンを無効化
+    stopButton.disabled = false; // 停止ボタンを有効化
+    asr.start(); // 音声認識を開始
 };
 
-// 音声認識が終了したときのイベントハンドラ
-asr.onend = function() {
-  console.log('音声認識が終了しました。');
-};
-
-// 音声認識を開始する関数
-function startRecognition() {
-  asr.start();
-  console.log('音声認識を開始しました。');
-}
-
-// 音声認識を停止する関数
-function stopRecognition() {
-  asr.stop();
-  console.log('音声認識を停止しました。');
-}
-
-// ユーザーがマイクボタンをクリックしたときの処理
-micButton.onclick = function() {
-  if (isListening) {
-    stopRecognition();
-    micButton.textContent = 'マイクを開始する';
-    isListening = false;
-  } else {
-    startRecognition();
-    micButton.textContent = 'マイクを停止する';
-    isListening = true;
-  }
+// 停止ボタンが押されたときのイベントハンドラ
+stopButton.onclick = function(){
+    startButton.disabled = false; // 開始ボタンを有効化
+    stopButton.disabled = true; // 停止ボタンを無効化
+    asr.stop(); // 音声認識を停止
 };
 
 </script>
@@ -267,4 +248,3 @@ micButton.onclick = function() {
 
 ```javascript
 const weatherAPIURL = "https://weatherapiurl.com"; // 天気APIのリクエストURLを設定
-const appID = "your_app_id"; // あなたのアプリケーションIDを設定
