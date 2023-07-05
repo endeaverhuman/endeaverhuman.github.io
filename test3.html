@@ -1,0 +1,270 @@
+<html lang="ja">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<link rel="stylesheet" type="text/css" href="sound.css">
+<title>Spoken Dialog by Javascript</title>
+<script src="sound.js"></script>
+
+<style>
+.startButton{
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #00abff;
+  color: #fff;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+</style>
+</head>
+<body>
+<h6>課題：音声対話</h6>
+<br></br>
+<h1>肯定くんとのおしゃべりサイト</h1>
+<br></br>
+<h3>何でも肯定してくれる肯定くんとおしゃべりして癒されよう！！</h3>
+<br></br>
+<h4>--使い方--</h4>
+<h5>>>お話しする<<のボタンを押してマイクを許可すればお話しすることができます！<br>
+<br>
+読み取れない場合は一時停止ボタンを押しおてね<br>
+<br>
+読み取り中は青く文字が表示されるよ</h5>
+<br></br>
+<p>
+<button id="startButton">>> お話しする <<</button>
+<button id="stopButton">一時停止</button>
+</p>
+<br></br>
+<p>
+<div id="resultOutput"></div>
+<div class="photo-container">
+  
+</div>
+<div id="photo-container">
+  <img id="photo" src="" alt="">
+</div>
+<div class="photo-container">
+  <img src="t-boy.png" alt="話している男の子">
+</div>
+
+
+</p>
+<h2>肯定くん(6)</h2>
+<script>
+
+// ウエイクワードの定義
+var wake_word = "OK.*コンピューター";
+
+const URL = "https://jlp.yahooapis.jp/NLUService/V2/analyze?appid="; // APIのリクエストURL
+const APPID = "hogehogehogehogehogehogehogehogehogehogehogehoge"; // あなたのアプリケーションID
+const queryURL = URL + APPID;
+
+const startButton = document.querySelector('#startButton'); // 開始ボタン
+const stopButton = document.querySelector('#stopButton'); // 停止ボタン
+const resultOutput = document.querySelector('#resultOutput'); // 結果出力エリア
+
+if (!'SpeechSynthesisUtterance' in window) {
+    alert("あなたのブラウザはSpeech Synthesis APIに未対応です。");
+}
+const tts = new SpeechSynthesisUtterance(); // TTSインスタンスを生成
+tts.lang = "ja-JP"; // 言語(日本語)、英語の場合はen-US
+tts.rate = 1.0; // 速度
+tts.pitch = -2.0; // 声の高さ
+tts.volume = 1.0; // 音量
+
+SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+if (!'SpeechRecognition' in window) {
+    alert("あなたのブラウザはSpeech Recognition APIに未対応です。");
+}
+
+// 応答の定義（ハッシュ）    
+var response = {
+    "あなた,誰":["僕は肯定くんだ",""],
+    "愚痴,聞いて":["静かに聞いておくから存分に吐き出しな",""],
+    "人生,何":["笑うことだ",""],
+    "好きな言葉は":["i love youだ",""],
+	"今日,疲れた":["明日も頑張って、君は誉れ高い生き物なんだ",""],
+	"今日,眠い":["おすすめの安眠できる曲を再生するよ","https://www.youtube.com/watch?v=5izk_wReDTo"],
+    "和歌山,晴れ":["近日の和歌山市の晴れの日を教えるよ", ""],
+    "大阪,晴れ":["近日の大阪市の晴れの日を教えるよ", ""]
+};
+
+const asr = new SpeechRecognition(); // ASRインスタンスを生成
+asr.lang = "ja-JP"; // 言語（日本語）
+asr.interimResults = true; // 途中結果出力をオン
+asr.continuous = true; // 継続入力をオン
+
+let output = ''; // 出力
+
+// 認識結果が出力されたときのイベントハンドラ
+asr.onresult = function(event) {
+  let transcript = event.results[event.resultIndex][0].transcript; // 結果文字列
+  let transcript_previous = null; // 結果文字列（ひとつ前）
+
+  if (event.resultIndex > 0) {
+    transcript_previous = event.results[event.resultIndex - 1][0].transcript;
+  }
+
+  let output_not_final = '';
+  if (event.results[event.resultIndex].isFinal) { // 結果が確定（Final）のとき
+    if (new RegExp(wake_word).test(transcript_previous)) {
+      asr.abort(); // 音声認識を停止
+      let ret = response[transcript];
+
+      let answer = response[transcript];
+      let webpage;
+
+      let keys = Object.keys(response);
+      keys.forEach(function(key) {
+        let flag = true;
+        console.log(transcript);
+        key.split(',').forEach(function(word) {
+          let pattern = new RegExp(word);
+          let flag_test = pattern.test(transcript); // マッチしたらtrue, しなかったらfalse
+          flag = flag && flag_test; // 両方trueならtrue
+          console.log(pattern + '+' + ':' + flag_test);
+        });
+
+        if (flag) {
+          answer = response[key];
+          console.log(key + " : " + answer[0]);
+          webpage = answer[1];
+        }
+      });
+
+      if (answer) {
+        output = answer[0]; // 回答を設定
+        output_not_final = answer[0];
+        if (webpage) {
+          window.open(webpage);
+        } else if (transcript.includes("和歌山") && transcript.includes("晴れ")) {
+          const weatherAPIURL =  "https://map.yahooapis.jp/weather/V1/place?appid=" + appid + "&coordinates=" + encodeURI( query ) + "&output=json&callback=showResult";; // 天気APIのリクエストURLを設定
+          const appID = 'dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-'; // あなたのアプリケーションIDを設定
+
+          // 天気APIへのリクエストを行う処理
+          const requestURL = `${weatherAPIURL}?appid=${appID}&city=和歌山市&output=json`; // 和歌山市の天気情報を取得するリクエストURL
+
+          fetch(requestURL)
+            .then(response => response.json())
+            .then(data => {
+              const forecasts = data.forecasts;
+              const sunnyDays = forecasts.filter(forecast => forecast.telop === "晴れ");
+
+              if (sunnyDays.length > 0) {
+                const shortestSunnyDay = sunnyDays[0];
+                const date = shortestSunnyDay.dateLabel;
+                const weather = shortestSunnyDay.telop;
+
+                const result = `${date}は${weather}です。`;
+                resultOutput.textContent = result;
+
+                // 最短の晴れの日のページにリダイレクトする処理を追加する
+                // 例: window.open("https://example.com/sunny-page");
+
+              } else {
+                resultOutput.textContent = "和歌山市の今週の天気情報では晴れの日はありません。";
+              }
+            })
+            .catch(error => {
+              console.error("天気APIのリクエスト中にエラーが発生しました。", error);
+              resultOutput.textContent = "天気情報の取得中にエラーが発生しました。";
+            });
+
+        } else if (transcript.includes("大阪") && transcript.includes("晴れ")) {
+          const weatherAPIURL =  "https://map.yahooapis.jp/weather/V1/place?appid=" + appid + "&coordinates=" + encodeURI( query ) + "&output=json&callback=showResult";; // 天気APIのリクエストURLを設定
+          const appID = 'dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-'; // あなたのアプリケーションIDを設定
+
+          // 天気APIへのリクエストを行う処理
+          const requestURL = `${weatherAPIURL}?appid=${appID}&city=大阪市&output=json`; // 大阪市の天気情報を取得するリクエストURL
+
+          fetch(requestURL)
+            .then(response => response.json())
+            .then(data => {
+              const forecasts = data.forecasts;
+              const sunnyDays = forecasts.filter(forecast => forecast.telop === "晴れ");
+
+              if (sunnyDays.length > 0) {
+                const shortestSunnyDay = sunnyDays[0];
+                const date = shortestSunnyDay.dateLabel;
+                const weather = shortestSunnyDay.telop;
+
+                const result = `${date}は${weather}です。`;
+                resultOutput.textContent = result;
+
+                // 最短の晴れの日のページにリダイレクトする処理を追加する
+                // 例: window.open("https://example.com/sunny-page");
+
+              } else {
+                resultOutput.textContent = "大阪市の今週の天気情報では晴れの日はありません。";
+              }
+            })
+            .catch(error => {
+              console.error("天気APIのリクエスト中にエラーが発生しました。", error);
+              resultOutput.textContent = "天気情報の取得中にエラーが発生しました。";
+            });
+
+        }
+      } else {
+        output = 'よく聞き取れませんでした。もう一度お願いします。'; // 不明な場合はエラーメッセージを設定
+      }
+    } else { // 途中結果
+      output_not_final = transcript; // 途中結果を設定
+    }
+    resultOutput.textContent = output_not_final; // 出力エリアに結果を表示
+    tts.text = output; // TTSにテキストを設定
+    speechSynthesis.speak(tts); // TTSで発話
+  }
+};
+
+// 音声認識エラーが発生したときのイベントハンドラ
+asr.onerror = function(event) {
+  console.error('音声認識エラー:', event.error);
+};
+
+// 音声認識が終了したときのイベントハンドラ
+asr.onend = function() {
+  console.log('音声認識が終了しました。');
+};
+
+// 音声認識を開始する関数
+function startRecognition() {
+  asr.start();
+  console.log('音声認識を開始しました。');
+}
+
+// 音声認識を停止する関数
+function stopRecognition() {
+  asr.stop();
+  console.log('音声認識を停止しました。');
+}
+
+// ユーザーがマイクボタンをクリックしたときの処理
+micButton.onclick = function() {
+  if (isListening) {
+    stopRecognition();
+    micButton.textContent = 'マイクを開始する';
+    isListening = false;
+  } else {
+    startRecognition();
+    micButton.textContent = 'マイクを停止する';
+    isListening = true;
+  }
+};
+
+</script>
+</body>
+</html>
+このコードでは、Yahoo!の天気APIを追加し、ユーザーが「今週いつ晴れるか」という発話を行った場合に、最短の晴れの日のページにリダイレクトするようになっています。
+
+以下のステップに従ってコードを修正します。
+
+1. 以下のコードを追加して、Yahoo!の天気APIのリクエストURLとアプリケーションIDを設定します。
+
+```javascript
+const weatherAPIURL = "https://weatherapiurl.com"; // 天気APIのリクエストURLを設定
+const appID = "your_app_id"; // あなたのアプリケーションIDを設定
