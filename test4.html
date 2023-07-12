@@ -6,6 +6,7 @@
 <meta http-equiv="Content-Script-Type" content="text/javascript">
 <link rel="stylesheet" type="text/css" href="sound.css">
 <title>Spoken Dialog by Javascript</title>
+<script src="sound.js"></script>
 
 <style>
 .startButton{
@@ -129,12 +130,12 @@ asr.onresult = function(event) {
       if (webpage) {
         window.open(webpage);
       } else if (transcript.includes("和歌山") && transcript.includes("晴れ")) {
-        const weatherAPIURL =  'https://map.yahooapis.jp/weather/V1/place?appid=YOUR_APP_ID&coordinates=34.2300,135.1700&output=json'; // 天気APIのリクエストURLを設定
+        const weatherAPIURL =  'https://map.yahooapis.jp/weather/V1/place?appid=dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-&coordinates=34.2300,135.1700&output=json'; // 天気APIのリクエストURLを設定
         const appID = 'dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-'; // あなたのアプリケーションIDを設定
         
 
         // 天気APIへのリクエストを行う処理
-        const requestURL = `${weatherAPIURL}?appid=${appID}&city=和歌山市&output=json`; // 和歌山市の天気情報を取得するリクエストURL
+        const requestURL = `https://map.yahooapis.jp/weather/V1/place`; // 和歌山市の天気情報を取得するリクエストURL
 
         fetch(requestURL)
           .then(response => response.json())
@@ -163,12 +164,12 @@ asr.onresult = function(event) {
           });
 
       } else if (transcript.includes("大阪") && transcript.includes("晴れ")) {
-        const weatherAPIURL =  'https://map.yahooapis.jp/weather/V1/place?appid={appid}&coordinates=34.6937,135.5023&output=json'// 天気APIのリクエストURLを設定
+        const weatherAPIURL =  'https://map.yahooapis.jp/weather/V1/place?appid=dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-&coordinates=34.6937,135.5023&output=json'// 天気APIのリクエストURLを設定
         const appID = 'dj00aiZpPTlhZ0pyakx1Q0tLQSZzPWNvbnN1bWVyc2VjcmV0Jng9OWY-'; // あなたのアプリケーションIDを設定
        
 
         // 天気APIへのリクエストを行う処理
-        const requestURL = `${weatherAPIURL}?appid=${appID}&city=大阪市&output=json`; // 大阪市の天気情報を取得するリクエストURL
+        const requestURL = `https://map.yahooapis.jp/weather/V1/place`; // 大阪市の天気情報を取得するリクエストURL
 
         fetch(requestURL)
           .then(response => response.json())
@@ -193,8 +194,10 @@ asr.onresult = function(event) {
           })
           .catch(error => {
             console.error("天気APIのリクエスト中にエラーが発生しました。", error);
+            console.log(error.stack); // スタックトレースを表示
             resultOutput.textContent = "天気情報の取得中にエラーが発生しました。";
           });
+
 
       }
     } else {
