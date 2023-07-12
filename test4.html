@@ -6,7 +6,6 @@
 <meta http-equiv="Content-Script-Type" content="text/javascript">
 <link rel="stylesheet" type="text/css" href="sound.css">
 <title>Spoken Dialog by Javascript</title>
-<script src="sound.js"></script>
 
 <style>
 .startButton{
@@ -63,9 +62,7 @@ const startButton = document.querySelector('#startButton'); // 開始ボタン
 const stopButton = document.querySelector('#stopButton'); // 停止ボタン
 const resultOutput = document.querySelector('#resultOutput'); // 結果出力エリア
 
-if (!'SpeechSynthesisUtterance' in window) {
-    alert("あなたのブラウザはSpeech Synthesis APIに未対応です。");
-}
+
 const tts = new SpeechSynthesisUtterance(); // TTSインスタンスを生成
 tts.lang = "ja-JP"; // 言語(日本語)、英語の場合はen-US
 tts.rate = 1.0; // 速度
